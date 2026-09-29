@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="./css/semantic.min.css">
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="./js/semantic.min.js"></script>
+</head>
+
+<body>
+    <div class="ui container">
+        <div class="ui secondary  menu">
+            <a class="active item" href="index.html">
+                Home
+            </a>
+            <div class="right menu">
+                <div class="item">
+                    <div class="ui icon input">
+                        <input type="text" placeholder="Search..." id="search">
+                        <i class="search link icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ui six doubling cards" id="pkmnList">
+        </div>
+    </div>
+</body>
+<script src="./js/json.js"></script>
+<script src="./js/tools.js"></script>
+<script>
+    const pokopia = JSON.parse(pokopiastring);
+
+    const pkmn = pokopia.pokemon;   
+
+    fillListPkmn(pkmn);
+
+    $("#search").change(function () {
+        var val = $("#search").val();
+        val = upperFirstChar(val);
+
+        var items = pkmn.filter(p => p.nom.indexOf(val) !== -1);
+        fillListPkmn(items);
+    });
+
+
+</script>

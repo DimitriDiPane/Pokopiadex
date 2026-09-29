@@ -1,0 +1,265 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="./css/semantic.min.css">
+  <link rel="stylesheet" href="./css/styles.css">
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+  <script src="./js/semantic.min.js"></script>
+</head>
+
+<body>
+  <div class="ui container">
+    <div class="ui secondary  menu">
+      <a class="item" href="index.html">
+        Home
+      </a>
+      <!-- <a class="active item">
+        Pokémon
+      </a> -->
+    </div>
+
+    <div class="ui breadcrumb">
+      <a class="section" href="index.html">Pokémon</a>
+      <i class="right arrow icon divider"></i>
+      <div class="active section" id="nameMenu">Missingno</div>
+    </div>
+
+    <h1 class="ui header" id="pkmn"></h1>
+    <div class="ui segment" id="containerColor">
+      <p>
+      <div class="ui two column grid">
+        <div class="column">
+          <div class="ui inverted raised segment" id="topTab">
+            <a class="ui ribbon label" id="abilitesRibbon">Abilités</a>
+            <div class="ui list" id="abilites">
+            </div>
+            </br>
+            <a class="ui ribbon label" id="environnementRibbon">Evironnement</a>
+            <div class="ui list">
+              <div class="item" id="environnement"></div>
+            </div>
+          </div>
+        </div>
+        </p>
+        <img class="ui left floated image" id="pkmnImg">
+      </div>
+      <p>
+      <div class="column">
+        <div class="ui inverted raised segment" id="bottomTab">
+          <a class="ui left ribbon label" id="preferencesRibbon">Préférences</a>
+          <div class="ui list">
+            <div class="item" id="preferences"></div>
+          </div>
+          <a class="ui left ribbon label" id="meublesRibbon">Meubles</a>
+          <div class="ui inverted top attached tabular menu" id="meublenu">
+          </div>
+          <div id="tabs">
+          </div>
+        </div>
+      </div>
+      </p>
+    </div>
+  </div>
+
+  <script src="./js/json.js"></script>
+  <script src="./js/tools.js"></script>
+  <script>
+    $('.ui.rating').rating('disable');
+    var abilitesRibbonColor = "blue";
+    var environnementRibbonColor = "red";
+    var preferencesRibbonColor = "orange";
+    var meublesRibbonColor = "teal";
+
+    let params = new URLSearchParams(document.location.search);
+    let pkmnId = params.get("id");
+
+    const pokopia = JSON.parse(pokopiastring);
+
+    const pkmn = pokopia.pokemon;
+    const thisPkmn = pkmn.find(p => p.num == pkmnId);
+    const obj = pokopia.objets;
+    const seReposer = obj.seReposer;
+    const decorer = obj.decorer;
+    const amuser = obj.amuser;
+    const cadeaux = obj.autre;
+    const nourriture = obj.nourriture;
+
+    for (const [key, value] of Object.entries(obj)) {
+      console.log(`${key}: ${value}`);
+      var tab = document.getElementById("meublenu");
+      var a = document.createElement("a");
+      a.className = "item mbl";
+      a.id = key + "Pan";
+      var txt = document.createTextNode(value.nom);
+      a.appendChild(txt);
+      tab.appendChild(a);
+      makeATab(key, value.items);
+    };
+
+    $('#meublenu a:first').addClass('active');
+
+    $('.item.mbl').on("click", function () {
+      console.log(this);
+      $('.item.mbl').removeClass('active');
+      $(this).addClass('active');
+      var thisId = $(this).attr('id');
+      console.log(thisId.slice(0, -3));
+      setMenuTab(thisId.slice(0, -3));
+    });
+
+    function setMenuTab(tab) {
+      $(".tab").removeClass("active");
+      $("#" + tab).addClass("active");
+    };
+
+    document.getElementById("pkmn").innerHTML = thisPkmn.nom;
+    document.getElementById("nameMenu").innerHTML = thisPkmn.nom;
+    var color = getColor(thisPkmn.type[0]);
+
+    changeLabelColor("abilitesRibbon", abilitesRibbonColor, color);
+    changeLabelColor("environnementRibbon", environnementRibbonColor, color);
+
+
+    document.getElementById("topTab").classList.add(color);
+    console.log(thisPkmn.type[1]);
+    if (thisPkmn.type[1] != "") {
+      var color2 = getColor(thisPkmn.type[1]);
+      document.getElementById("bottomTab").classList.add(color2);
+      changeLabelColor("preferencesRibbon", preferencesRibbonColor, color2);
+      changeLabelColor("meublesRibbon", meublesRibbonColor, color2);
+    } else {
+      document.getElementById("bottomTab").classList.add(color);
+      document.getElementById("preferencesRibbon").classList.add(preferencesRibbonColor);
+      document.getElementById("meublesRibbon").classList.add(meublesRibbonColor);
+    };
+    document.getElementById("containerColor").classList.add(color);
+    document.getElementById("environnement").innerHTML = thisPkmn.environnement;
+    document.getElementById("pkmnImg").src = "https://www.serebii.net/pokemonpokopia/pokemon/" + thisPkmn.num + ".png";
+    var ul = document.getElementById("abilites");
+    thisPkmn.abilites.forEach(ab => {
+      if (ab != null) {
+        var li = document.createElement("div");
+        li.className = "item";
+        var text = document.createTextNode(ab);
+        li.appendChild(text);
+        ul.appendChild(li);
+      };
+    });
+
+    ul = document.getElementById("preferences");
+    thisPkmn.preferences.forEach(fav => {
+      if (fav != null) {
+        var li = document.createElement("div");
+        li.className = "item";
+        var text = document.createTextNode(fav);
+        li.appendChild(text);
+        ul.appendChild(li);
+      };
+    });
+
+    function makeATab(targetTab, list) {
+      var mblList = [];
+      var enName = ""
+      list.forEach(mbl => {
+        var total = 0;
+        mbl.preferences.forEach(mblp => {
+          thisPkmn.preferences.forEach(pkmnp => {
+            if (mblp == pkmnp) {
+              total += 1;
+            };
+          });
+        });
+        enName = mbl.nomEn.replace(/\s/g, '').replace("é", "e").toLowerCase();
+        var entry = [total, mbl.nom, enName, mbl.preferences];
+        mblList.push(entry);
+        mblList.sort().reverse();
+      });
+
+      var tabs = document.getElementById("tabs");
+      var divSegTab = document.createElement("div");
+      divSegTab.className = "ui bottom attached segment tab";
+      divSegTab.id = targetTab;
+      var table = document.createElement("table");
+      table.className = "ui celled padded table";
+      var thead = document.createElement("thead");
+      var tr = document.createElement("tr");
+      var thSingle = document.createElement("th");
+      thSingle.className = "single line";
+      var txt = document.createTextNode("Efficacité");
+      thSingle.appendChild(txt);
+      var thObjet = document.createElement("th");
+      txt = document.createTextNode("Objet");
+      thObjet.appendChild(txt);
+      var thIcone = document.createElement("th");
+      txt = document.createTextNode("Icone");
+      thIcone.appendChild(txt);
+      var tBody = document.createElement("tbody");
+      tBody.id = targetTab + "Tab";
+
+
+      tr.appendChild(thSingle);
+      tr.appendChild(thObjet);
+      tr.appendChild(thIcone);
+
+      thead.appendChild(tr);
+
+      table.appendChild(thead);
+      table.appendChild(tBody);
+
+      divSegTab.appendChild(table);
+
+      tabs.appendChild(divSegTab);
+
+      $('#tabs div:first').addClass('active');
+
+      mblList.forEach(mbl => {
+        if (mbl[0] > 0) {
+          var tab = document.getElementById(targetTab + "Tab");
+          var tr = document.createElement("tr");
+          var td = document.createElement("td");
+          var tdName = document.createElement("td");
+          var tdIco = document.createElement("td");
+          var div = document.createElement("div");
+          var img = document.createElement("img");
+          var divPopup = document.createElement("div");
+          var list = "";
+          divPopup.className = "ui popup";
+          mbl[3].forEach(fav => {
+            var txtPopup = document.createTextNode(fav);
+            var p = document.createElement("p");
+            p.appendChild(txtPopup);
+            divPopup.appendChild(p);
+          });
+          img.src = "https://www.serebii.net/pokemonpokopia/items/" + mbl[2] + ".png";
+          img.className = "ui mini spaced image";
+          tdName.className = "single line";
+          div.className = "ui heart rating";
+          div.id = "rate_" + mbl[1];
+          var text = document.createTextNode(mbl[1]);
+          div.setAttribute('data-rating', mbl[0]);
+          div.setAttribute('data-max-rating', mbl[0]);
+          tdName.appendChild(text);
+          tdIco.appendChild(img);
+          tdIco.appendChild(divPopup);
+          td.appendChild(div);
+          tr.appendChild(td);
+          tr.appendChild(tdName);
+          tr.appendChild(tdIco);
+          tab.appendChild(tr);
+        };
+      });
+      $('.ui.rating').rating('disable');
+    };
+
+    $('.ui.rating').rating('disable');
+    $('.ui.mini.spaced.image')
+      .popup()
+      ;
+  </script>
+</body>
+
+</html>
